@@ -8,7 +8,9 @@ check_cc () {
     fi
 }
 
-for file in `find $pict_dir -type f \( -iname '*.jpg' -o -iname '*.jpeg' \)` ; do 
+cd $pict_dir
+
+for file in `find . -type f \( -iname '*.jpg' -o -iname '*.jpeg' \)` ; do 
     echo $file
     file_name=`basename "$file"`
     echo $file_name
