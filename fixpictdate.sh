@@ -8,6 +8,14 @@ pictmap_file=fixpictdate_cache.txt
 # which need to be fixed manually
 tofix_file=fixpictdate_tofix.txt
 
+# patterns to apply to file and dir names to detect the date
+# 1st pattern to detect date and time
+pattern_date_time='^.*(199[0-9]|200[0-9]|201[0-9]|2020)[-_]*([01][0-9])[-_]*([0-3][0-9])[-_]*([0-2][0-9])[-_]*([0-6][0-9])[-_]*([0-9][0-9]).*$'
+# 2nd pattern to detect date if the 1st was not successful
+pattern_date='^.*(199[0-9]|200[0-9]|201[0-9]|2020)[-_]*([01][0-9])[-_]*([0-3][0-9]).*$'
+# 3rd pattern to detect month if the 2nd was not successful
+pattern_month='^.*(199[0-9]|200[0-9]|201[0-9]|2020)[-_]*([01][0-9]).*$'
+
 # checks the last complettion code 
 # and exits the script if it wasn't 0 
 check_cc () {
@@ -17,8 +25,10 @@ check_cc () {
     fi
 }
 
+echo -n "" >$0.log
+
 log () {
-    echo $@
+   echo $@ >> $0.log
 }
 
 # the assotiative array with the picture information
@@ -34,7 +44,7 @@ get_pictinfo() {
     IFS=$';' read -r -a pictmap_arr <<< "$pictmap_line"
     pictmap_change_date=${pictmap_arr[0]}
     pictmap_original_date=${pictmap_arr[1]}
-    log "existing info for $1 -> change date: $pictmap_change_date, original date: $pictmap_original_date"
+    #log "existing info for $1 -> change date: $pictmap_change_date, original date: $pictmap_original_date"
 }
 
 # stores the picture info for the file
@@ -44,26 +54,67 @@ put_pictinfo() {
     #2 param: file change date
     #3 param: picture original date
     local pictmap_line="$2;$3"
-    log "store in pictmap: $1 -> $pictmap_line"
+    #log "store in pictmap: $1 -> $pictmap_line"
     pictmap[$1]="$pictmap_line" 
 }
 
 # tries to fix the missing picture original date
-# analysing the file name and the directory
+# analysing the file name, the directory name and the file change date
 fix_pictdate() {
-    local file_name=`basename "$file"`
-    log "file name: $file_name"
-    # todo try to detect the date/time by the file name
-    local file_dir=`dirname "$file"`
-    log "file dir: $file_dir"
-    # todo if not successful by file name use the dir name
-
-    # todo
-    # finaly compare the change date with detected 
-    # if they are the same but the detected date is missing the time component -> use the change date as original date 
-
-    # dummy: return "no success"
-    return 1
+    local file=$1
+    log "try to fix $file"
+    local filename=`basename "$file"`
+    log "file name: $filename"
+    local dir=`dirname "$file"`
+    log "file dir: $dir"
+    local fix_date_time
+    local fix_date
+    local fix_month
+    if [[ $filename =~ $pattern_date_time ]]; then
+        fix_date_time="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}:${BASH_REMATCH[6]}"
+        log "detected the date/time from file name: $fix_date_time"
+    elif [[ $filename =~ $pattern_date ]]; then
+        fix_date="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]}"
+        log "detected the date from the file name: $fix_date"   
+    elif [[ $dir =~ $pattern_date ]]; then
+        fix_date="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]}"
+        log "detected the date from the dir name: $fix_date"   
+    elif [[ $dir =~ $pattern_month ]]; then
+        fix_month="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}"
+        log "detected the month from the dir name: $fix_month"
+    fi
+    if [ -z "$fix_date_time" ]; then
+        if [ -n "$fix_date" ]; then
+            local change_date=`date "+%Y:%m:%d" -r "$file"`
+            log "the file change date is: $change_date"
+            if [ "$fix_date" = "$change_date" ]; then
+                log "the fix and the change dates are the same so just use the change date/time as the fix date/time"
+                fix_date_time=`date "+%Y:%m:%d %H:%M:%S" -r "$file"`
+            else
+                log "the fix and the chage dates differ so just use the 12:00 as the time"
+                fix_date_time="$fix_date 12:00:00"
+            fi
+        elif [ -n "$fix_month" ]; then
+            local change_month=`date "+%Y:%m" -r "$file"`
+            log "the file change month is: $change_month"
+            if [ "$fix_month" = "$change_month" ]; then
+                log "the fix and the change months are the same so just use the change date/time as the fix date/time"
+                fix_date_time=`date "+%Y:%m:%d %H:%M:%S" -r "$file"`
+            else
+                log "the fix and the chage dates differ so just use the first day of the month an the 12:00 as the time"
+                fix_date_time="${fix_month}:01 12:00:00"
+            fi
+        fi
+    fi
+    if [ -n "$fix_date_time" ]; then
+        log "change the file original date to $fix_date_time"
+        exiftool -overwrite_original -m "-datetimeoriginal=${fix_date_time}" "${file}"
+        file_original_date=`exiftool -s3 -datetimeoriginal "$file"`
+        file_change_date=`date "+%Y:%m:%d %H:%M:%S" -r "$file"`
+        put_pictinfo "$file" "$file_change_date" "$file_original_date"
+    else
+        log "could not detect the date for use for fix"
+    fi
 }
 
 cd $pict_dir
@@ -99,9 +150,6 @@ for file in `find . -type f \( -iname '*.jpg' -o -iname '*.jpeg' \)` ; do
     put_pictinfo "$file" "$file_change_date" "$file_original_date"
     if [ -z "$file_original_date" ]; then
         fix_pictdate "$file"
-        if [ "$?" -eq '0' ]; then
-            put_pictinfo "$file" "$new_change_date" "$fixed_original_date"
-        fi
     fi
 done
 
