@@ -139,7 +139,6 @@ fi
  
 # find all *.jpg or *.jpeg pictures in the folder,
 # analyse their original date and try to fix it
-find . -type f -print0 \( -iname '*.jpg' -o -iname '*.jpeg' \) |
 while IFS= read -r -d '' file; do 
     log "processing: $file"
     file_change_date=`date "+%Y:%m:%d %H:%M:%S" -r "$file"`
@@ -157,7 +156,7 @@ while IFS= read -r -d '' file; do
     if [ -z "$file_original_date" ]; then
         fix_pictdate "$file"
     fi
-done
+done < <( find . -type f \( -iname '*.jpg' -o -iname '*.jpeg' \) -print0 )
 
 # store the pictmap (back) into the pictmap file 
 # overwriting the old one
@@ -170,3 +169,6 @@ for file in "${!pictmap[@]}"; do
         echo -e "$file;${pictmap[$file]}" >> "$tofix_file";
     fi  
 done
+
+sort -o "$pictmap_file" "$pictmap_file"
+sort -o "$tofix_file" "$tofix_file"
