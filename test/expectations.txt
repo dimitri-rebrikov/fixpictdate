@@ -1,0 +1,12 @@
+dir001_20200305/pict001.jpg;2019:05:02 14:28;keep the date original of the pictures that have it
+dir001_20200305/pict002_20200208.jpg;2019:05:02 14:28;keep the date original even the picture name suggests another one 
+dir001_20200305/pict003_202001151516.jpg;2020:01:15 15:16;fix the empty picture date from the file name #1
+dir001_20200305/pict004_20200115_1516.jpg;2020:01:15 15:16;fix the empty picture date from the file name #2
+dir001_20200305/pict005_2020-01-15_1516.jpg;2020:01:15 15:16;fix the empty picture date from the file name #3
+dir001_20200305/pict006 20200115.jpg;2020:01:15 12:00; fix the empty picture date from the file name with default time #1
+dir001_20200305/pict007_2020-01-15.jpg;2020:01:15 12:00; fix the empty picture date from the file name with default time #2
+dir001_20200305/pict008 .jpg;2020:03:05 12:00;fix the empty picture date using the date from the folder name
+dir001_20200305/pict009_20200502.jpg;2020:05:02 14:26;detect that the date from the picture name is the same as the change date and use the change date as the picture date
+dir002_2020-04/pict008 .jpg;2020:04:01 12:00;fix the empty picture date using the month from the folder name and default day and time
+dir002_2020-05-02/pict008 .jpg;2020:05:02 14:26;detect that the date from the folder name is the same as the change date and use the change date as the picture date
+dir002_2020-05/pict008 .jpg;2020:05:02 14:26;detect that the date from the folder name is the same as the change date and use the change date as the picture date

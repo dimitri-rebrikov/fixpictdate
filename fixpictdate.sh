@@ -1,5 +1,7 @@
 #! /bin/bash
-pict_dir=$1
+pict_dir=`realpath $1`
+
+log_file="$pict_dir/$0.log"
 
 # name of the cache file
 pictmap_file=fixpictdate_cache.txt
@@ -9,8 +11,10 @@ pictmap_file=fixpictdate_cache.txt
 tofix_file=fixpictdate_tofix.txt
 
 # patterns to apply to file and dir names to detect the date
-# 1st pattern to detect date and time
-pattern_date_time='^.*(199[0-9]|200[0-9]|201[0-9]|2020)[-_]*([01][0-9])[-_]*([0-3][0-9])[-_]*([0-2][0-9])[-_]*([0-6][0-9])[-_]*([0-9][0-9]).*$'
+# pattern to detect date and time (with seconds)
+pattern_date_time_seconds='^.*(199[0-9]|200[0-9]|201[0-9]|2020)[-_]*([01][0-9])[-_]*([0-3][0-9])[-_]*([0-2][0-9])[-_]*([0-6][0-9])[-_]*([0-9][0-9]).*$'
+# pattern to detect date and time (without seconds)
+pattern_date_time='^.*(199[0-9]|200[0-9]|201[0-9]|2020)[-_]*([01][0-9])[-_]*([0-3][0-9])[-_]*([0-2][0-9])[-_]*([0-6][0-9]).*$'
 # 2nd pattern to detect date if the 1st was not successful
 pattern_date='^.*(199[0-9]|200[0-9]|201[0-9]|2020)[-_]*([01][0-9])[-_]*([0-3][0-9]).*$'
 # 3rd pattern to detect month if the 2nd was not successful
@@ -25,10 +29,8 @@ check_cc () {
     fi
 }
 
-echo -n "" >$0.log
-
 log () {
-   echo $@ >> $0.log
+   echo `date "+%Y:%m:%d %H:%M:%S"`: $@ >> "$log_file"
 }
 
 # the assotiative array with the picture information
@@ -70,8 +72,11 @@ fix_pictdate() {
     local fix_date_time
     local fix_date
     local fix_month
-    if [[ $filename =~ $pattern_date_time ]]; then
+    if [[ $filename =~ $pattern_date_time_secondds ]]; then
         fix_date_time="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}:${BASH_REMATCH[6]}"
+        log "detected the date/time (sec) from file name: $fix_date_time"
+    elif [[ $filename =~ $pattern_date_time ]]; then
+        fix_date_time="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}"
         log "detected the date/time from file name: $fix_date_time"
     elif [[ $filename =~ $pattern_date ]]; then
         fix_date="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]}"
@@ -108,7 +113,7 @@ fix_pictdate() {
     fi
     if [ -n "$fix_date_time" ]; then
         log "change the file original date to $fix_date_time"
-        exiftool -overwrite_original -m "-datetimeoriginal=${fix_date_time}" "${file}"
+        exiftool -overwrite_original -m "-datetimeoriginal=${fix_date_time}" "${file}" >> "$log_file" 2>&1
         file_original_date=`exiftool -s3 -datetimeoriginal "$file"`
         file_change_date=`date "+%Y:%m:%d %H:%M:%S" -r "$file"`
         put_pictinfo "$file" "$file_change_date" "$file_original_date"
@@ -134,7 +139,8 @@ fi
  
 # find all *.jpg or *.jpeg pictures in the folder,
 # analyse their original date and try to fix it
-for file in `find . -type f \( -iname '*.jpg' -o -iname '*.jpeg' \)` ; do 
+find . -type f -print0 \( -iname '*.jpg' -o -iname '*.jpeg' \) |
+while IFS= read -r -d '' file; do 
     log "processing: $file"
     file_change_date=`date "+%Y:%m:%d %H:%M:%S" -r "$file"`
     log "change date: $file_change_date"
