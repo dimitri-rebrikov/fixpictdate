@@ -72,19 +72,19 @@ fix_pictdate() {
     local fix_date_time
     local fix_date
     local fix_month
-    if [[ $filename =~ $pattern_date_time_secondds ]]; then
+    if [[ "$filename" =~ $pattern_date_time_seconds ]]; then
         fix_date_time="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}:${BASH_REMATCH[6]}"
         log "detected the date/time (sec) from file name: $fix_date_time"
-    elif [[ $filename =~ $pattern_date_time ]]; then
+    elif [[ "$filename" =~ $pattern_date_time ]]; then
         fix_date_time="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}"
         log "detected the date/time from file name: $fix_date_time"
-    elif [[ $filename =~ $pattern_date ]]; then
+    elif [[ "$filename" =~ $pattern_date ]]; then
         fix_date="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]}"
         log "detected the date from the file name: $fix_date"   
-    elif [[ $dir =~ $pattern_date ]]; then
+    elif [[ "$dir" =~ $pattern_date ]]; then
         fix_date="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]}"
         log "detected the date from the dir name: $fix_date"   
-    elif [[ $dir =~ $pattern_month ]]; then
+    elif [[ "$dir" =~ $pattern_month ]]; then
         fix_month="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}"
         log "detected the month from the dir name: $fix_month"
     fi
