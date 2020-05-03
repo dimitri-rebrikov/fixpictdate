@@ -160,6 +160,16 @@ fi
 log_INFO "search for pictures in $pict_dir"
 cd $pict_dir
 
+declare find_NOTPATH=""
+if [ -n "$NOTPATH" ]; then
+    log_INFO "exclude directories $NOTPATH"
+    IFS=$','
+    for notpath_elem in $NOTPATH; do
+        find_NOTPATH="$find_NOTPATH -not -path \"$notpath_elem\""
+    done <<< "$NOTPATH"
+    unset IFS
+fi
+
 # file structure: file_path<\t>file_change_date<\t>picture_original_date
 if [ -f "$pictmap_file" ]; then
     log_INFO "load existing pictures info from the $pictmap_file" 
@@ -173,16 +183,6 @@ if [ -f "$pictmap_file" ]; then
     done < "$pictmap_file"
 else    
     log_INFO "the file is $pictmap_file not found"
-fi
-
-declare find_NOTPATH=""
-if [ -n "$NOTPATH" ]; then
-    log_INFO "exclude directories $NOTPATH"
-    IFS=$','
-    for notpath_elem in $NOTPATH; do
-        find_NOTPATH="$find_NOTPATH -not -path \"$notpath_elem\""
-    done <<< "$NOTPATH"
-    unset IFS
 fi
 
 find_command="find . -type f \( -iname '*.jpg' -o -iname '*.jpeg' \) $find_NOTPATH -print0"
