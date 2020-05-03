@@ -144,14 +144,16 @@ while IFS= read -r -d '' file; do
     file_change_date=`date "+%Y:%m:%d %H:%M:%S" -r "$file"`
     log "change date: $file_change_date"
     get_pictinfo "$file" # loads pictmap_change_date and pictmap_original_date
-    if [ "$file_change_date" = "$pictmap_change_date" ]; then
-        log "file already handled and not changed since that so skip it"
-        continue
+    if [ "$file_change_date" != "$pictmap_change_date" ]; then
+        log "the file is new or was changed"
+        # use exiftool to request the picture original date 
+        file_original_date=`exiftool -s3 -datetimeoriginal "$file"`
+        check_cc
+    else
+        log "the file is known"
+        file_original_date=$pictmap_original_date
     fi
-    # use exiftool to request the picture original date 
-    file_original_date=`exiftool -s3 -datetimeoriginal "$file"`
-    check_cc
-    log "the original date from file: $file_original_date"
+    log "the picture original date: $file_original_date"
     put_pictinfo "$file" "$file_change_date" "$file_original_date"
     if [ -z "$file_original_date" ]; then
         fix_pictdate "$file"
