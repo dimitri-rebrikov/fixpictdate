@@ -1,0 +1,2 @@
+dir006/pict008 .jpg;;second run keep the empty date if no detection possible
+dir006/pict009_2015-06-07-1733.jpg;2015:06:07 17:33;second run detect the creation date
