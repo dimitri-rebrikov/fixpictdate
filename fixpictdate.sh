@@ -1,6 +1,14 @@
 #! /bin/bash
 pict_dir=`realpath $1`
 
+if [ -z "$LOGLEVEL" ]; then
+    LOGLEVEL=1
+fi
+
+if [ -z "$DRYRUN" ]; then 
+    DRYRUN=0
+fi
+
 log_file="$pict_dir/$0.log"
 
 # name of the cache file
@@ -30,8 +38,28 @@ check_cc () {
 }
 
 log () {
-   echo `date "+%Y:%m:%d %H:%M:%S"`: $@ >> "$log_file"
+   echo -e `date "+%Y:%m:%d %H:%M:%S"`: $@ >> "$log_file"
 }
+
+log_INFO () {
+    if [ "$LOGLEVEL" -ge 1 ]; then
+        log $@
+    fi
+}
+
+log_DEBUG () {
+    if [ "$LOGLEVEL" -ge 2 ]; then
+        log $@
+    fi
+}
+
+log_TRACE () {
+    if [ "$LOGLEVEL" -ge 3 ]; then
+        log $@
+    fi
+}
+
+
 
 # the assotiative array with the picture information
 # filepath->file_change_date<\t>picture_original_date
@@ -46,7 +74,7 @@ get_pictinfo() {
     IFS=$';' read -r -a pictmap_arr <<< "$pictmap_line"
     pictmap_change_date=${pictmap_arr[0]}
     pictmap_original_date=${pictmap_arr[1]}
-    #log "existing info for $1 -> change date: $pictmap_change_date, original date: $pictmap_original_date"
+    log_TRACE "existing info for $1 -> change date: $pictmap_change_date, original date: $pictmap_original_date"
 }
 
 # stores the picture info for the file
@@ -56,7 +84,7 @@ put_pictinfo() {
     #2 param: file change date
     #3 param: picture original date
     local pictmap_line="$2;$3"
-    #log "store in pictmap: $1 -> $pictmap_line"
+    log_TRACE "store in pictmap: $1 -> $pictmap_line"
     pictmap[$1]="$pictmap_line" 
 }
 
@@ -64,96 +92,103 @@ put_pictinfo() {
 # analysing the file name, the directory name and the file change date
 fix_pictdate() {
     local file=$1
-    log "try to fix $file"
+    log_DEBUG "try to fix $file"
     local filename=`basename "$file"`
-    log "file name: $filename"
+    log_TRACE "file name: $filename"
     local dir=`dirname "$file"`
-    log "file dir: $dir"
+    log_TRACE "file dir: $dir"
     local fix_date_time
     local fix_date
     local fix_month
     if [[ "$filename" =~ $pattern_date_time_seconds ]]; then
         fix_date_time="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}:${BASH_REMATCH[6]}"
-        log "detected the date/time (sec) from file name: $fix_date_time"
+        log_DEBUG "detected the date/time (sec) from file name: $fix_date_time"
     elif [[ "$filename" =~ $pattern_date_time ]]; then
         fix_date_time="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}"
-        log "detected the date/time from file name: $fix_date_time"
+        log_DEBUG "detected the date/time from file name: $fix_date_time"
     elif [[ "$filename" =~ $pattern_date ]]; then
         fix_date="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]}"
-        log "detected the date from the file name: $fix_date"   
+        log_DEBUG "detected the date from the file name: $fix_date"   
     elif [[ "$dir" =~ $pattern_date ]]; then
         fix_date="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]}"
-        log "detected the date from the dir name: $fix_date"   
+        log_DEBUG "detected the date from the dir name: $fix_date"   
     elif [[ "$dir" =~ $pattern_month ]]; then
         fix_month="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}"
-        log "detected the month from the dir name: $fix_month"
+        log_DEBUG "detected the month from the dir name: $fix_month"
     fi
     if [ -z "$fix_date_time" ]; then
         if [ -n "$fix_date" ]; then
             local change_date=`date "+%Y:%m:%d" -r "$file"`
-            log "the file change date is: $change_date"
+            log_DEBUG "the file change date is: $change_date"
             if [ "$fix_date" = "$change_date" ]; then
-                log "the fix and the change dates are the same so just use the change date/time as the fix date/time"
+                log_DEBUG "the fix and the change dates are the same so just use the change date/time as the fix date/time"
                 fix_date_time=`date "+%Y:%m:%d %H:%M:%S" -r "$file"`
             else
-                log "the fix and the chage dates differ so just use the 12:00 as the time"
+                log_DEBUG "the fix and the chage dates differ so just use the 12:00 as the time"
                 fix_date_time="$fix_date 12:00:00"
             fi
         elif [ -n "$fix_month" ]; then
             local change_month=`date "+%Y:%m" -r "$file"`
-            log "the file change month is: $change_month"
+            log_DEBUG "the file change month is: $change_month"
             if [ "$fix_month" = "$change_month" ]; then
-                log "the fix and the change months are the same so just use the change date/time as the fix date/time"
+                log_DEBUG "the fix and the change months are the same so just use the change date/time as the fix date/time"
                 fix_date_time=`date "+%Y:%m:%d %H:%M:%S" -r "$file"`
             else
-                log "the fix and the chage dates differ so just use the first day of the month an the 12:00 as the time"
+                log_DEBUG "the fix and the chage dates differ so just use the first day of the month an the 12:00 as the time"
                 fix_date_time="${fix_month}:01 12:00:00"
             fi
         fi
     fi
     if [ -n "$fix_date_time" ]; then
-        log "change the file original date to $fix_date_time"
-        exiftool -overwrite_original -m "-datetimeoriginal=${fix_date_time}" "${file}" >> "$log_file" 2>&1
+        log_INFO "set the pict orig date for $file to $fix_date_time"
+        local fix_command="exiftool -overwrite_original -m \"-datetimeoriginal=${fix_date_time}\" \"${file}\""
+        if [ "$DRYRUN" -ne 1 ]; then
+            eval "$fix_command" >> "$log_file" 2>&1
+        else
+            log_INFO "It's dry run, otherwise would do:\n$fix_command"
+        fi
         file_original_date=`exiftool -s3 -datetimeoriginal "$file"`
         file_change_date=`date "+%Y:%m:%d %H:%M:%S" -r "$file"`
         put_pictinfo "$file" "$file_change_date" "$file_original_date"
     else
-        log "could not detect the date for use for fix"
+        log_INFO "could not detect the date for use for fix $file"
     fi
 }
 
 cd $pict_dir
 
-log "load the pictmap from the $pictmap_file" 
 # file structure: file_path<\t>file_change_date<\t>picture_original_date
 if [ -f "$pictmap_file" ]; then
+    log_INFO "load existing pictures info from the $pictmap_file" 
     declare -a pictmap_arr
     while IFS= read -r pictmap_line; do
-        log "loading line $pictmap_line"
+        log_TRACE "loading line $pictmap_line"
         pictmap_arr=()
         IFS=$';' read -r -a pictmap_arr <<< "$pictmap_line"
-        log "splitted into \"${pictmap_arr[0]}\" \"${pictmap_arr[1]}\" \"${pictmap_arr[2]}\""
+        log_TRACE "splitted into \"${pictmap_arr[0]}\" \"${pictmap_arr[1]}\" \"${pictmap_arr[2]}\""
         put_pictinfo "${pictmap_arr[0]}" "${pictmap_arr[1]}" "${pictmap_arr[2]}"
-    done < "$pictmap_file" 
+    done < "$pictmap_file"
+else    
+    log_INFO "the file is $pictmap_file not found"
 fi
  
 # find all *.jpg or *.jpeg pictures in the folder,
 # analyse their original date and try to fix it
 while IFS= read -r -d '' file; do 
-    log "processing: $file"
+    log_DEBUG "processing: $file"
     file_change_date=`date "+%Y:%m:%d %H:%M:%S" -r "$file"`
-    log "change date: $file_change_date"
+    log_DEBUG "change date: $file_change_date"
     get_pictinfo "$file" # loads pictmap_change_date and pictmap_original_date
     if [ "$file_change_date" != "$pictmap_change_date" ]; then
-        log "the file is new or was changed"
+        log_DEBUG "the file is new or was changed"
         # use exiftool to request the picture original date 
         file_original_date=`exiftool -s3 -datetimeoriginal "$file"`
         check_cc
     else
-        log "the file is known"
+        log_DEBUG "the file is known"
         file_original_date=$pictmap_original_date
     fi
-    log "the picture original date: $file_original_date"
+    log_DEBUG "the picture original date: $file_original_date"
     put_pictinfo "$file" "$file_change_date" "$file_original_date"
     if [ -z "$file_original_date" ]; then
         fix_pictdate "$file"
