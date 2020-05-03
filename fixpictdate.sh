@@ -7,8 +7,6 @@ fi
 
 if [ -z "$DRYRUN" ]; then 
     DRYRUN=0
-elif [ "$DRYRUN" -eq 1 ]; then
-    log_INFO "This is a dry run. No files will be changed."
 fi
 
 log_file="$pict_dir/$0.log"
@@ -60,8 +58,6 @@ log_TRACE () {
         log "TRACE $@"
     fi
 }
-
-
 
 # the assotiative array with the picture information
 # filepath->file_change_date<\t>picture_original_date
@@ -156,6 +152,10 @@ fix_pictdate() {
         log_INFO "could not detect the date for use for fix $file"
     fi
 }
+
+if [ "$DRYRUN" -eq 1 ]; then
+    log_INFO "This is a dry run. No files will be changed."
+fi
 
 log_INFO "search for pictures in $pict_dir"
 cd $pict_dir
