@@ -11,3 +11,5 @@ dir002_2020-04/pict008 .jpg;2020:04:01 12:00;fix the empty picture date using th
 dir003_2020-05-02/pict008 .jpg;2020:05:02 14:26;detect that the date from the folder name is the same as the change date and use the change date as the picture date
 dir004_2020-05/pict008 .jpg;2020:05:02 14:26;detect that the date from the folder name is the same as the change date and use the change date as the picture date
 dir005/pict008 .jpg;;keep the empty date if no detection possible
+#recycle/pict003_202001151516.jpg;;do not fix the file in ignored folder #1
+temporary1/pict003_202001151516.jpg;;do not fix the file in ignored folder #1

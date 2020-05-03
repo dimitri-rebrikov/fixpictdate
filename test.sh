@@ -14,6 +14,9 @@ test_run_dir=$test_tmp_dir/test
 test1_expectations_file=./test/expectations1.txt
 test2_expectations_file=./test/expectations2.txt
 
+# directory filter
+NOTPATH="*/#recycle/*,*/temporary*/*"
+
 check_expectations() {
     local expectations_file=$1
     # iterate over the expectations and compare the with the real results
@@ -56,7 +59,7 @@ echo -e "\nFirst test run\n"
 cp -p -r "$test1_source_dir"/* "$test_run_dir"
 
 # run the main script in the test dir
-./fixpictdate.sh "$test_run_dir"
+NOTPATH="$NOTPATH" ./fixpictdate.sh "$test_run_dir"
 
 check_expectations "$test1_expectations_file"
 test1_cc=$?
@@ -67,7 +70,7 @@ echo -e "\nSecond test run\n"
 cp -p -r "$test2_source_dir"/* "$test_run_dir"
 
 # re-run the main script in the test dir
-./fixpictdate.sh "$test_run_dir"
+NOTPATH="$NOTPATH" ./fixpictdate.sh "$test_run_dir"
 
 # retest the 1st expectations as the fix ran in the same directory
 check_expectations "$test1_expectations_file"

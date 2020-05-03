@@ -7,6 +7,8 @@ fi
 
 if [ -z "$DRYRUN" ]; then 
     DRYRUN=0
+elif [ "$DRYRUN" -eq 1 ]; then
+    log_INFO "This is a dry run. No files will be changed."
 fi
 
 log_file="$pict_dir/$0.log"
@@ -43,19 +45,19 @@ log () {
 
 log_INFO () {
     if [ "$LOGLEVEL" -ge 1 ]; then
-        log $@
+        log "INFO $@"
     fi
 }
 
 log_DEBUG () {
     if [ "$LOGLEVEL" -ge 2 ]; then
-        log $@
+        log "DEBUG $@"
     fi
 }
 
 log_TRACE () {
     if [ "$LOGLEVEL" -ge 3 ]; then
-        log $@
+        log "TRACE $@"
     fi
 }
 
@@ -155,6 +157,7 @@ fix_pictdate() {
     fi
 }
 
+log_INFO "search for pictures in $pict_dir"
 cd $pict_dir
 
 # file structure: file_path<\t>file_change_date<\t>picture_original_date
@@ -171,7 +174,20 @@ if [ -f "$pictmap_file" ]; then
 else    
     log_INFO "the file is $pictmap_file not found"
 fi
- 
+
+declare find_NOTPATH=""
+if [ -n "$NOTPATH" ]; then
+    log_INFO "exclude directories $NOTPATH"
+    IFS=$','
+    for notpath_elem in $NOTPATH; do
+        find_NOTPATH="$find_NOTPATH -not -path \"$notpath_elem\""
+    done <<< "$NOTPATH"
+    unset IFS
+fi
+
+find_command="find . -type f \( -iname '*.jpg' -o -iname '*.jpeg' \) $find_NOTPATH -print0"
+log_DEBUG "find command for pictures: $find_command"
+
 # find all *.jpg or *.jpeg pictures in the folder,
 # analyse their original date and try to fix it
 while IFS= read -r -d '' file; do 
@@ -193,7 +209,7 @@ while IFS= read -r -d '' file; do
     if [ -z "$file_original_date" ]; then
         fix_pictdate "$file"
     fi
-done < <( find . -type f \( -iname '*.jpg' -o -iname '*.jpeg' \) -print0 )
+done < <( eval "$find_command" )
 
 # store the pictmap (back) into the pictmap file 
 # overwriting the old one
