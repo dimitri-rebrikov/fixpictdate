@@ -59,7 +59,14 @@ echo -e "\nFirst test run\n"
 cp -p -r "$test1_source_dir"/* "$test_run_dir"
 
 # run the main script in the test dir
-NOTPATH="$NOTPATH" ./fixpictdate.sh "$test_run_dir"
+LOGLEVEL=2 NOTPATH="$NOTPATH" ./fixpictdate.sh "$test_run_dir"
+
+cached1=`grep "DEBUG the file is known" "$test_run_dir/fixpictdate.sh.log" | wc -l`
+
+if [ "$cached1" -gt 0 ]; then
+    echo "FAIL: General failure the log file contains info about cache entries ($cached1) but it must have no"
+    exit 1
+fi
 
 check_expectations "$test1_expectations_file"
 test1_cc=$?
@@ -69,8 +76,11 @@ echo -e "\nSecond test run\n"
 # copy the files for the 2nd test
 cp -p -r "$test2_source_dir"/* "$test_run_dir"
 
+# comment this in to simulate caching failure
+#rm "$test_run_dir/fixpictdate_cache.txt"
+
 # re-run the main script in the test dir
-NOTPATH="$NOTPATH" ./fixpictdate.sh "$test_run_dir"
+LOGLEVEL=2 NOTPATH="$NOTPATH" ./fixpictdate.sh "$test_run_dir"
 
 # retest the 1st expectations as the fix ran in the same directory
 check_expectations "$test1_expectations_file"
@@ -80,7 +90,14 @@ test1_rr_cc=$?
 check_expectations "$test2_expectations_file"
 test2_cc=$?
 
-if [ "$test1_cc" -eq 0 ] && [ "$test1_rr_cc" -eq 0 ] && [ "$test2_cc" -eq 0 ]; then 
+cached2=`grep "DEBUG the file is known" "$test_run_dir/fixpictdate.sh.log" | wc -l`
+
+if [ "$cached2" -eq 0 ]; then
+    echo "FAIL: Caching does not work"
+fi
+
+if [ "$test1_cc" -eq 0 ] && [ "$test1_rr_cc" -eq 0 ] \
+    && [ "$test2_cc" -eq 0 ] && [ "$cached2" -gt 0 ]; then 
     echo "Total Test result: OK"
 else 
     echo "Total Test result: FAIL"
