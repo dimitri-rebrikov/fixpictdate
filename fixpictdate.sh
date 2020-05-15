@@ -28,14 +28,13 @@ pattern_date='^.*(199[0-9]|200[0-9]|201[0-9]|2020)[-_]*([01][0-9])[-_]*([0-3][0-
 # 3rd pattern to detect month if the 2nd was not successful
 pattern_month='^.*(199[0-9]|200[0-9]|201[0-9]|2020)[-_]*([01][0-9]).*$'
 
-# checks the last complettion code 
-# and exits the script if it wasn't 0 
-check_cc () {
-    cc=$?
-    if [ "$cc" -ne "0" ]; then
-        exit $cc
-    fi
-}
+# the assotiative array with the picture information
+# filepath->file_change_date<\t>picture_original_date
+declare -A pictmap
+
+#
+# Functions
+#
 
 log () {
    echo -e `date "+%Y:%m:%d %H:%M:%S"`: $@ >> "$log_file"
@@ -58,10 +57,6 @@ log_TRACE () {
         log "TRACE $@"
     fi
 }
-
-# the assotiative array with the picture information
-# filepath->file_change_date<\t>picture_original_date
-declare -A pictmap
 
 # load the picture info for the file from the pictmap
 # into the variable pictmap_change_date and pictmap_original_date
@@ -89,8 +84,13 @@ put_pictinfo() {
 # loads the DateTimeOriginal into file_original_date variable
 load_file_original_date() {
     local file=$1
-    file_original_date=`exiftool -s3 -datetimeoriginal "$file" 2>> "$log_file"`
-    check_cc
+    file_original_date=`exiv2 -K Exif.Photo.DateTimeOriginal -Pv "$file" 2>> "$log_file"`
+    cc=$?
+    # cc shall be either 0 (ok) or 1 (no Date found)
+    if [ "$cc" -ne "0" ] && [ "$cc" -ne "1" ]; then
+        log_INFO "error $cc during exiv2 call on $file"
+        exit 1
+    fi 
 }
 
 #puts the DateTimeOriginal into the file
@@ -167,6 +167,10 @@ fix_pictdate() {
         log_INFO "could not detect the date for use for fix $file"
     fi
 }
+
+#
+#  Main code
+#
 
 if [ "$DRYRUN" -eq 1 ]; then
     log_INFO "This is a dry run. No files will be changed."

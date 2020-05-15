@@ -17,6 +17,14 @@ test2_expectations_file=./test/expectations2.txt
 # directory filter
 NOTPATH="*/#recycle/*,*/temporary*/*"
 
+check_cc () {
+    cc=$?
+    if [ "$cc" -ne "0" ]; then
+        echo "Error!"
+        exit $cc
+    fi
+}
+
 check_expectations() {
     local expectations_file=$1
     # iterate over the expectations and compare the with the real results
@@ -60,6 +68,7 @@ cp -p -r "$test1_source_dir"/* "$test_run_dir"
 
 # run the main script in the test dir
 LOGLEVEL=2 NOTPATH="$NOTPATH" ./fixpictdate.sh "$test_run_dir"
+check_cc
 
 cached1=`grep "DEBUG the file is known" "$test_run_dir/fixpictdate.sh.log" | wc -l`
 
@@ -81,6 +90,7 @@ cp -p -r "$test2_source_dir"/* "$test_run_dir"
 
 # re-run the main script in the test dir
 LOGLEVEL=2 NOTPATH="$NOTPATH" ./fixpictdate.sh "$test_run_dir"
+check_cc
 
 # retest the 1st expectations as the fix ran in the same directory
 check_expectations "$test1_expectations_file"
