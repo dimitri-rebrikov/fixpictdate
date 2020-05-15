@@ -88,7 +88,7 @@ load_file_original_date() {
     cc=$?
     # cc shall be either 0 (ok) or 1 (no Date found)
     if [ "$cc" -ne "0" ] && [ "$cc" -ne "1" ]; then
-        log_INFO "error $cc during exiv2 call on $file"
+        log_INFO "error $cc during exiv2 read call on $file"
         exit 1
     fi 
 }
@@ -98,9 +98,16 @@ set_date_time_original() {
     local file=$1
     local fix_date_time=$2
     log_INFO "set the pict orig date for $file to $fix_date_time"
-    local fix_command="exiftool -overwrite_original -m \"-datetimeoriginal=${fix_date_time}\" \"${file}\""
+    local fix_command="exiv2 -M\"set Exif.Photo.DateTimeOriginal ${fix_date_time}\" \"${file}\""
     if [ "$DRYRUN" -ne 1 ]; then
         eval "$fix_command" >> "$log_file" 2>&1
+        cc=$?
+        # cc shall be 0 (ok)
+        if [ "$cc" -ne "0" ]; then
+            log_INFO "error $cc during exiv2 write call on $file"
+            log_INFO "command: $fix_command"
+            exit 1
+        fi
     else
         log_INFO "It's dry run, otherwise would do:\n$fix_command"
     fi
