@@ -86,6 +86,26 @@ put_pictinfo() {
     pictmap[$1]="$pictmap_line" 
 }
 
+# loads the DateTimeOriginal into file_original_date variable
+load_file_original_date() {
+    local file=$1
+    file_original_date=`exiftool -s3 -datetimeoriginal "$file" 2>> "$log_file"`
+    check_cc
+}
+
+#puts the DateTimeOriginal into the file
+set_date_time_original() {
+    local file=$1
+    local fix_date_time=$2
+    log_INFO "set the pict orig date for $file to $fix_date_time"
+    local fix_command="exiftool -overwrite_original -m \"-datetimeoriginal=${fix_date_time}\" \"${file}\""
+    if [ "$DRYRUN" -ne 1 ]; then
+        eval "$fix_command" >> "$log_file" 2>&1
+    else
+        log_INFO "It's dry run, otherwise would do:\n$fix_command"
+    fi
+}
+
 # tries to fix the missing picture original date
 # analysing the file name, the directory name and the file change date
 fix_pictdate() {
@@ -139,13 +159,8 @@ fix_pictdate() {
     fi
     if [ -n "$fix_date_time" ]; then
         log_INFO "set the pict orig date for $file to $fix_date_time"
-        local fix_command="exiftool -overwrite_original -m \"-datetimeoriginal=${fix_date_time}\" \"${file}\""
-        if [ "$DRYRUN" -ne 1 ]; then
-            eval "$fix_command" >> "$log_file" 2>&1
-        else
-            log_INFO "It's dry run, otherwise would do:\n$fix_command"
-        fi
-        file_original_date=`exiftool -s3 -datetimeoriginal "$file"`
+        set_date_time_original "$file" "$fix_date_time"
+        load_file_original_date "$file"
         file_change_date=`date "+%Y:%m:%d %H:%M:%S" -r "$file"`
         put_pictinfo "$file" "$file_change_date" "$file_original_date"
     else
@@ -197,9 +212,7 @@ while IFS= read -r -d '' file; do
     get_pictinfo "$file" # loads pictmap_change_date and pictmap_original_date
     if [ "$file_change_date" != "$pictmap_change_date" ]; then
         log_DEBUG "the file is new or was changed"
-        # use exiftool to request the picture original date 
-        file_original_date=`exiftool -s3 -datetimeoriginal "$file"`
-        check_cc
+        load_file_original_date "$file"
     else
         log_DEBUG "the file is known"
         file_original_date=$pictmap_original_date
