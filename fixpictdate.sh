@@ -165,7 +165,6 @@ fix_pictdate() {
         fi
     fi
     if [ -n "$fix_date_time" ]; then
-        log_INFO "set the pict orig date for $file to $fix_date_time"
         set_date_time_original "$file" "$fix_date_time"
         load_file_original_date "$file"
         file_change_date=`date "+%Y:%m:%d %H:%M:%S" -r "$file"`
