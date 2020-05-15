@@ -1,2 +1,8 @@
 dir006/pict008 .jpg;;second run keep the empty date if no detection possible
 dir006/pict009_2015-06-07-1733.jpg;2015:06:07 17:33;second run detect the creation date
+dir007_with_dates/20170425_102529-01-01.jpg;2017:04:25 10:25;read the date from file which doesn't work with exiftools
+dir007_with_dates/2020-02-01_DSC_7423-01.jpg;2020:01:23 16:40;read the date from file which doesn't work with exiftools
+dir007_with_dates/IMG_20190714_123114-01.jpg;2019:07:14 12:31;read the date from file which doesn't work with exiftools
+dir008_without_dates/20170425_102529-01-01.jpg;2017:04:25 10:25;fix the date in file which doesn't work with exiftool
+dir008_without_dates/2020-02-01_DSC_7423-01.jpg;2020:02:01 12:00;fix the date in file which doesn't work with exiftool
+dir008_without_dates/IMG_20190714_123114-01.jpg;2019:07:14 12:31;fix the date in file which doesn't work with exiftool

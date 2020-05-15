@@ -39,7 +39,8 @@ check_expectations() {
         expectation_description=${expectation_arr[2]}
         echo -e "\nTEST $expectation_description"
         echo "file: $test_run_dir/$test_file"
-        picture_date=`exiftool -s3 -datetimeoriginal  -d '%Y:%m:%d %H:%M' "$test_run_dir/$test_file"`
+        picture_date=`exiv2 -K Exif.Photo.DateTimeOriginal -Pv "$test_run_dir/$test_file"`
+        picture_date=${picture_date:0:16} #cut the seconds as exiv2 dosen't support formatting
         echo "expected: $expected_date , got: $picture_date"
         if [ "$expected_date" = "$picture_date" ]; then
             echo OK
