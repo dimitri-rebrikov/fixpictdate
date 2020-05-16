@@ -18,6 +18,29 @@ The non fixed files are listed in a "tofix" file in the root of the picture dire
 # application
 The are several occasions where the picture creation date is either not stored in the jpeg file (for example during the conversion from the raw file) or was removed from it by intention (for example by posting to the social networks). As many picture databases/managers rely on the picture creation infomation such picture files become invisible for the viewer or at least not visible in the time view. So the provided script is to fix this issue as good as it can be made using automatic approach (see functionality). My idea is that this script is started on the regular basis on directory acting as the main picture storage an repairs the picture date for all new files missing it. Additional the user shall look into "tofix" file produced by script, to manually fix the issue for the files, which could not fixed automaticall. The most convenient fix in this case is to put the picture date into the file name, so the script will fill the internal creation date field of the field during the next run time.  
 
+# installation steps
+
+## Windows
+
+1. Install "git for windows". It will also provide the Bash Shell (Git Bash)
+2. Install exiv2, the msvc64 variant. Just extract the zip file to any place.
+3. Add the <dir-where-you-extracted-exiv2>/bin directory to the PATH windows environment variable
+4. Start Git Bash
+5. Check the exiv2 is in the PATH by calling "exiv2". Fix the PATH if the programm cannot be found.
+
+## Unix (Debian)
+
+1. install git (sudo apt-get install git
+2. install exiv2 (sudo apt-get install exiv2)
+
+## Common part
+1. In the Bash shell:
+2. Change to the directory you would like to install the fixpictdate into
+3. Clone the fixpictate (git clone https://github.com/dimitri-rebrikov/fixpictdate.git)
+4. Switch to the fixpictdate subdirectory 
+5. Call ./test.sh
+6. If the test was not ok, inspect the output and then the ./tmp/test/fixpictdate.sh.log to finde the issue
+
 # performance
 The call of the exiv2 is relatively time consuming.
 And the script calls the exiv2 for every picture separately.
