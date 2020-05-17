@@ -86,8 +86,8 @@ load_file_original_date() {
     local file=$1
     file_original_date=`exiv2 -K Exif.Photo.DateTimeOriginal -Pv "$file" 2>> "$log_file"`
     cc=$?
-    # cc shall be either 0 (ok) or 1 (no Date found)
-    if [ "$cc" -ne "0" ] && [ "$cc" -ne "1" ]; then
+    # cc shall be either 0 (ok) or 1 (no DateTimeOriginal found) or 253 (no EXIF data found)
+    if [ "$cc" -ne "0" ] && [ "$cc" -ne "1" ] && [ "$cc" -ne "253" ]; then
         log_INFO "error $cc during exiv2 read call on $file"
         exit 1
     fi 
