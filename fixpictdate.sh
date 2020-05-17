@@ -204,7 +204,11 @@ if [ -f "$pictmap_file" ]; then
         pictmap_arr=()
         IFS=$';' read -r -a pictmap_arr <<< "$pictmap_line"
         log_TRACE "splitted into \"${pictmap_arr[0]}\" \"${pictmap_arr[1]}\" \"${pictmap_arr[2]}\""
-        put_pictinfo "${pictmap_arr[0]}" "${pictmap_arr[1]}" "${pictmap_arr[2]}"
+        if [ -f "${pictmap_arr[0]}" ]; then
+            put_pictinfo "${pictmap_arr[0]}" "${pictmap_arr[1]}" "${pictmap_arr[2]}"
+        else
+            log_DEBUG "ignore file ${pictmap_arr[0]} as it does not exist anymore"
+        fi
     done < "$pictmap_file"
 else    
     log_INFO "the file is $pictmap_file not found"

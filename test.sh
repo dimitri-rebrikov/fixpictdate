@@ -113,9 +113,48 @@ if [ "$cached2" -eq 0 ]; then
     echo "FAIL: Caching does not work"
 fi
 
+
+echo -e "\nTest file removing\n"
+
+test_remove_file_cc=0
+file_to_simulate_removing="dir005/pict008 .jpg"
+
+cache_found1=`grep "$file_to_simulate_removing" "$test_run_dir/fixpictdate_cache.txt" | wc -l`
+if [ "$cache_found1" -ne "1" ]; then 
+    echo "FAIL: the file $file_to_simulate_removing shall be in the cache file"
+    test_remove_file_cc=-1
+fi
+
+tofix_found1=`grep "$file_to_simulate_removing" "$test_run_dir/fixpictdate_tofix.txt" | wc -l`
+if [ "$tofix_found1" -ne "1" ]; then 
+    echo "FAIL: the file $file_to_simulate_removing shall be in the to-fix file"
+    test_remove_file_cc=-1
+fi
+
+# simulate the removing of a file
+rm "$test_run_dir/$file_to_simulate_removing"
+
+# re-run the main script in the test dir
+LOGLEVEL=2 NOTPATH="$NOTPATH" ./fixpictdate.sh "$test_run_dir"
+check_cc
+
+# the file shall be removed from cache and from tofix fles
+cache_found2=`grep "$file_to_simulate_removing" "$test_run_dir/fixpictdate_cache.txt" | wc -l`
+if [ "$cache_found2" -ne "0" ]; then 
+    echo "FAIL: the file $file_to_simulate_removing shal NOT be in the cache file anymore"
+    test_remove_file_cc=-1
+fi
+
+tofix_found2=`grep "$file_to_simulate_removing" "$test_run_dir/fixpictdate_tofix.txt" | wc -l`
+if [ "$tofix_found2" -ne "0" ]; then 
+    echo "FAIL: the file $file_to_simulate_removing shal NOT be in the to-fix file anymore"
+    test_remove_file_cc=-1
+fi
+
 if [ "$test1_cc" -eq 0 ] && [ "$test1_rr_cc" -eq 0 ] \
-    && [ "$test2_cc" -eq 0 ] && [ "$cached2" -gt 0 ]; then 
-    echo "Total Test result: OK"
+    && [ "$test2_cc" -eq 0 ] && [ "$cached2" -gt 0 ] \
+    && [ "$test_remove_file_cc" -eq 0 ]; then 
+    echo -e "\nTotal Test result: OK"
 else 
-    echo "Total Test result: FAIL"
+    echo -e "\nTotal Test result: FAIL"
 fi
