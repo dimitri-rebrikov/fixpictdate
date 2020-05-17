@@ -64,6 +64,9 @@ mkdir -p "$test_run_dir"
 
 echo -e "\nFirst test run\n"
 
+# restore the file creation dates of the pictures so the tests work as expected
+find "$test1_source_dir" -name "*.jpg" -exec  touch -t 202005021426  '{}' \;
+
 # copy the files for the 1st test
 cp -p -r "$test1_source_dir"/* "$test_run_dir"
 
@@ -82,6 +85,9 @@ check_expectations "$test1_expectations_file"
 test1_cc=$?
 
 echo -e "\nSecond test run\n"
+
+# restore the file creation dates of the pictures so the tests work as expected
+find "$test2_source_dir" -name "*.jpg" -exec  touch -t 202005021426  '{}' \;
 
 # copy the files for the 2nd test
 cp -p -r "$test2_source_dir"/* "$test_run_dir"
