@@ -32,6 +32,10 @@ pattern_month='^.*(199[0-9]|200[0-9]|201[0-9]|2020)[-_]*([01][0-9]).*$'
 # filepath->file_change_date<\t>picture_original_date
 declare -A pictmap
 
+files_found=0
+files_fixed=0
+files_not_fixed=0
+
 #
 # Functions
 #
@@ -169,7 +173,14 @@ fix_pictdate() {
         load_file_original_date "$file"
         file_change_date=`date "+%Y:%m:%d %H:%M:%S" -r "$file"`
         put_pictinfo "$file" "$file_change_date" "$file_original_date"
+        if [ -n "$file_original_date" ]; then
+            (( files_fixed++ ))
+        else
+            (( files_not_fixed++ ))
+            log_INFO "the date fixing for $file did not work"
+        fi
     else
+        (( files_not_fixed++ ))
         log_INFO "could not detect the date for use for fix $file"
     fi
 }
@@ -182,7 +193,7 @@ if [ "$DRYRUN" -eq 1 ]; then
     log_INFO "This is a dry run. No files will be changed."
 fi
 
-log_INFO "search for pictures in $pict_dir"
+log_INFO "Start: search for pictures in $pict_dir"
 cd $pict_dir
 
 declare find_NOTPATH=""
@@ -211,7 +222,7 @@ if [ -f "$pictmap_file" ]; then
         fi
     done < "$pictmap_file"
 else    
-    log_INFO "the file is $pictmap_file not found"
+    log_INFO "the file $pictmap_file not found"
 fi
 
 find_command="find . -type f \( -iname '*.jpg' -o -iname '*.jpeg' \) $find_NOTPATH -print0"
@@ -219,7 +230,8 @@ log_DEBUG "find command for pictures: $find_command"
 
 # find all *.jpg or *.jpeg pictures in the folder,
 # analyse their original date and try to fix it
-while IFS= read -r -d '' file; do 
+while IFS= read -r -d '' file; do
+    (( files_found++ )) 
     log_DEBUG "processing: $file"
     file_change_date=`date "+%Y:%m:%d %H:%M:%S" -r "$file"`
     log_DEBUG "change date: $file_change_date"
@@ -253,4 +265,4 @@ done
 sort -o "$pictmap_file" "$pictmap_file"
 sort -o "$tofix_file" "$tofix_file"
 
-log_INFO "finished."
+log_INFO "Finish: files found: $files_found, fixed: $files_fixed, not fixed: $files_not_fixed"
