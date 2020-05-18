@@ -252,3 +252,5 @@ done
 
 sort -o "$pictmap_file" "$pictmap_file"
 sort -o "$tofix_file" "$tofix_file"
+
+log_INFO "finished."
