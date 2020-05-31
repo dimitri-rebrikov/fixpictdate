@@ -20,13 +20,13 @@ tofix_file=fixpictdate_tofix.txt
 
 # patterns to apply to file and dir names to detect the date
 # pattern to detect date and time (with seconds)
-pattern_date_time_seconds='^.*(199[0-9]|200[0-9]|201[0-9]|2020)[-_]*([01][0-9])[-_]*([0-3][0-9])[-_]*([0-2][0-9])[-_]*([0-6][0-9])[-_]*([0-9][0-9]).*$'
+pattern_date_time_seconds='^.*(19[0-9][0-9]|20[0-2][0-9])[-_]*(0[1-9]|1[0-2])[-_]*(0[1-9]|[12][0-9]|3[01])[-_]*([01][0-9]|2[0-4])[-_]*([0-5][0-9]|60)[-_]*([0-9][0-9]).*$'
 # pattern to detect date and time (without seconds)
-pattern_date_time='^.*(199[0-9]|200[0-9]|201[0-9]|2020)[-_]*([01][0-9])[-_]*([0-3][0-9])[-_]*([0-2][0-9])[-_]*([0-6][0-9]).*$'
+pattern_date_time='^.*(19[0-9][0-9]|20[0-2][0-9])[-_]*(0[1-9]|1[0-2])[-_]*(0[1-9]|[12][0-9]|3[01])[-_]*([01][0-9]|2[0-4])[-_]*([0-5][0-9]|60).*$'
 # 2nd pattern to detect date if the 1st was not successful
-pattern_date='^.*(199[0-9]|200[0-9]|201[0-9]|2020)[-_]*([01][0-9])[-_]*([0-3][0-9]).*$'
+pattern_date='^.*(19[0-9][0-9]|20[0-2][0-9])[-_]*(0[1-9]|1[0-2])[-_]*(0[1-9]|[12][0-9]|3[01]).*$'
 # 3rd pattern to detect month if the 2nd was not successful
-pattern_month='^.*(199[0-9]|200[0-9]|201[0-9]|2020)[-_]*([01][0-9]).*$'
+pattern_month='^.*(19[0-9][0-9]|20[0-2][0-9])[-_]*(0[1-9]|1[0-2]).*$'
 
 # the assotiative array with the picture information
 # filepath->file_change_date<\t>picture_original_date

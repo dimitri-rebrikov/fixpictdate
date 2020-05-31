@@ -7,9 +7,14 @@ dir001_20200305/pict006 20200115.jpg;2020:01:15 12:00; fix the empty picture dat
 dir001_20200305/pict007_2020-01-15.jpg;2020:01:15 12:00; fix the empty picture date from the file name with default time #2
 dir001_20200305/pict008 .jpg;2020:03:05 12:00;fix the empty picture date using the date from the folder name
 dir001_20200305/pict009_20200502.jpg;2020:05:02 14:26;detect that the date from the picture name is the same as the change date and use the change date as the picture date
+dir001_20200305/pict010_1975-02-16.jpg;1975:02:16 12:00; fix the empty picture date from the file name with default time #3
+dir001_20200305/pict011_1908-04-05.jpg;1908:04:05 12:00; fix the empty picture date from the file name with default time #3
 dir002_2020-04/pict008 .jpg;2020:04:01 12:00;fix the empty picture date using the month from the folder name and default day and time
 dir003_2020-05-02/pict008 .jpg;2020:05:02 14:26;detect that the date from the folder name is the same as the change date and use the change date as the picture date
 dir004_2020-05/pict008 .jpg;2020:05:02 14:26;detect that the date from the folder name is the same as the change date and use the change date as the picture date
 dir005/pict008 .jpg;;keep the empty date if no detection possible
+dir005/pict009_2100-12-17.jpg;;keep the empty date for strange date #1
+dir005/pict010_1861-11-15.jpg;;keep the empty date for strange date #2
+dir005/pict011_2002-15-11.jpg;;keep the empty date for wrong date
 #recycle/pict003_202001151516.jpg;;do not fix the file in ignored folder #1
 temporary1/pict003_202001151516.jpg;;do not fix the file in ignored folder #1

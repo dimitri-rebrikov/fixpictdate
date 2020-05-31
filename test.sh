@@ -153,15 +153,15 @@ fi
 
 # test for counting
 counting_test_cc=0
-if [ `grep "Finish: files found: 13, fixed: 10, not fixed: 1" "$test_run_dir/fixpictdate.sh.log" | wc -l` -ne 1 ]; then
+if [ `grep "Finish: files found: 18, fixed: 12, not fixed: 4" "$test_run_dir/fixpictdate.sh.log" | wc -l` -ne 1 ]; then
     echo "FAIL: counting files from the 1st test run"
     counting_test_cc=-1
 fi
-if [ `grep "Finish: files found: 21, fixed: 4, not fixed: 2" "$test_run_dir/fixpictdate.sh.log" | wc -l` -ne 1 ]; then
+if [ `grep "Finish: files found: 26, fixed: 4, not fixed: 5" "$test_run_dir/fixpictdate.sh.log" | wc -l` -ne 1 ]; then
     echo "FAIL: counting files from the 2nd test run"
     counting_test_cc=-1
 fi
-if [ `grep "Finish: files found: 20, fixed: 0, not fixed: 1" "$test_run_dir/fixpictdate.sh.log" | wc -l` -ne 1 ]; then
+if [ `grep "Finish: files found: 25, fixed: 0, not fixed: 4" "$test_run_dir/fixpictdate.sh.log" | wc -l` -ne 1 ]; then
     echo "FAIL: counting files from the 3rd test run"
     counting_test_cc=-1
 fi
