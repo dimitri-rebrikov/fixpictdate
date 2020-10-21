@@ -20,13 +20,13 @@ tofix_file=fixpictdate_tofix.txt
 
 # patterns to apply to file and dir names to detect the date
 # pattern to detect date and time (with seconds)
-pattern_date_time_seconds='^.*(19[0-9][0-9]|20[0-2][0-9])[-_]*(0[1-9]|1[0-2])[-_]*(0[1-9]|[12][0-9]|3[01])[-_]*([01][0-9]|2[0-4])[-_]*([0-5][0-9]|60)[-_]*([0-9][0-9]).*$'
+pattern_date_time_seconds='^.*[^0-9](19[0-9][0-9]|20[0-2][0-9])[-_]*(0[1-9]|1[0-2])[-_]*(0[1-9]|[12][0-9]|3[01])[-_]*([01][0-9]|2[0-4])[-_]*([0-5][0-9]|60)[-_]*([0-9][0-9]).*$'
 # pattern to detect date and time (without seconds)
-pattern_date_time='^.*(19[0-9][0-9]|20[0-2][0-9])[-_]*(0[1-9]|1[0-2])[-_]*(0[1-9]|[12][0-9]|3[01])[-_]*([01][0-9]|2[0-4])[-_]*([0-5][0-9]|60).*$'
+pattern_date_time='^.*[^0-9](19[0-9][0-9]|20[0-2][0-9])[-_]*(0[1-9]|1[0-2])[-_]*(0[1-9]|[12][0-9]|3[01])[-_]*([01][0-9]|2[0-4])[-_]*([0-5][0-9]|60).*$'
 # 2nd pattern to detect date if the 1st was not successful
-pattern_date='^.*(19[0-9][0-9]|20[0-2][0-9])[-_]*(0[1-9]|1[0-2])[-_]*(0[1-9]|[12][0-9]|3[01]).*$'
+pattern_date='^.*[^0-9](19[0-9][0-9]|20[0-2][0-9])[-_]*(0[1-9]|1[0-2])[-_]*(0[1-9]|[12][0-9]|3[01]).*$'
 # 3rd pattern to detect month if the 2nd was not successful
-pattern_month='^.*(19[0-9][0-9]|20[0-2][0-9])[-_]*(0[1-9]|1[0-2]).*$'
+pattern_month='^.*[^0-9](19[0-9][0-9]|20[0-2][0-9])[-_]*(0[1-9]|1[0-2]).*$'
 
 # the assotiative array with the picture information
 # filepath->file_change_date<\t>picture_original_date
@@ -129,19 +129,19 @@ fix_pictdate() {
     local fix_date_time
     local fix_date
     local fix_month
-    if [[ "$filename" =~ $pattern_date_time_seconds ]]; then
+    if [[ "_$filename" =~ $pattern_date_time_seconds ]]; then
         fix_date_time="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}:${BASH_REMATCH[6]}"
         log_DEBUG "detected the date/time (sec) from file name: $fix_date_time"
-    elif [[ "$filename" =~ $pattern_date_time ]]; then
+    elif [[ "_$filename" =~ $pattern_date_time ]]; then
         fix_date_time="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}"
         log_DEBUG "detected the date/time from file name: $fix_date_time"
-    elif [[ "$filename" =~ $pattern_date ]]; then
+    elif [[ "_$filename" =~ $pattern_date ]]; then
         fix_date="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]}"
         log_DEBUG "detected the date from the file name: $fix_date"   
-    elif [[ "$dir" =~ $pattern_date ]]; then
+    elif [[ "_$dir" =~ $pattern_date ]]; then
         fix_date="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]}"
         log_DEBUG "detected the date from the dir name: $fix_date"   
-    elif [[ "$dir" =~ $pattern_month ]]; then
+    elif [[ "_$dir" =~ $pattern_month ]]; then
         fix_month="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}"
         log_DEBUG "detected the month from the dir name: $fix_month"
     fi
