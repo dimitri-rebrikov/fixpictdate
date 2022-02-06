@@ -1,5 +1,6 @@
 #! /bin/bash
-pict_dir=`realpath $1`
+script_name=`basename "$0"`
+pict_dir=`realpath "$1"`
 
 if [ -z "$LOGLEVEL" ]; then
     LOGLEVEL=1
@@ -9,7 +10,7 @@ if [ -z "$DRYRUN" ]; then
     DRYRUN=0
 fi
 
-log_file="$pict_dir/$0.log"
+log_file="$pict_dir/${script_name}.log"
 
 # name of the cache file
 pictmap_file=fixpictdate_cache.txt
@@ -194,7 +195,7 @@ if [ "$DRYRUN" -eq 1 ]; then
 fi
 
 log_INFO "Start: search for pictures in $pict_dir"
-cd $pict_dir
+cd "$pict_dir"
 
 declare find_NOTPATH=""
 if [ -n "$NOTPATH" ]; then
