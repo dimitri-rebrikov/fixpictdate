@@ -98,12 +98,26 @@ load_file_original_date() {
     fi 
 }
 
-#puts the DateTimeOriginal into the file
+# writes the fixed picture date into the file.
+# The date is stored in all three common EXIF date fields so that every
+# picture database/manager takes the same date, because the programs differ
+# in which field they trust:
+#   - Exif.Photo.DateTimeOriginal   (0x9003, exiftool: DateTimeOriginal) = the
+#     date the picture was taken. This is the field the script checks/fixes.
+#   - Exif.Photo.DateTimeDigitized  (0x9004, exiftool: CreateDate) = the date
+#     the picture was digitized. Some managers (e.g. PhotoPrism) prefer this
+#     field over the DateTimeOriginal when both are present and differ.
+#   - Exif.Image.DateTime           (0x0132, exiftool: ModifyDate) = date of
+#     the last image modification. Used as a fallback by some viewers.
 set_date_time_original() {
     local file=$1
     local fix_date_time=$2
     log_INFO "set the pict orig date for $file to $fix_date_time"
-    local fix_command="exiv2 -M\"set Exif.Photo.DateTimeOriginal ${fix_date_time}\" \"${file}\""
+    local fix_command="exiv2 \
+-M\"set Exif.Photo.DateTimeOriginal ${fix_date_time}\" \
+-M\"set Exif.Photo.DateTimeDigitized ${fix_date_time}\" \
+-M\"set Exif.Image.DateTime ${fix_date_time}\" \
+\"${file}\""
     if [ "$DRYRUN" -ne 1 ]; then
         eval "$fix_command" >> "$log_file" 2>&1
         cc=$?

@@ -15,8 +15,38 @@ For those files the script tries to find the mention of the picture date in:
 If it found it it puts the detected date as the picture creation date into the picture file.
 The non fixed files are listed in a "tofix" file in the root of the picture directory.
 
+# which date fields are set
+The detected date is stored in the three common EXIF date fields of the picture file:
+
+| exiv2 key | EXIF tag | exiftool name | meaning |
+| --- | --- | --- | --- |
+| Exif.Photo.DateTimeOriginal | 0x9003 | DateTimeOriginal | the date the picture was taken |
+| Exif.Photo.DateTimeDigitized | 0x9004 | CreateDate | the date the picture was digitized |
+| Exif.Image.DateTime | 0x0132 | ModifyDate | the date of the last image modification |
+
+All three fields are set to the same detected date (similar to the `exiftool -AllDates` shortcut).
+The script decides that a date is missing by checking the `DateTimeOriginal` field only,
+but writing all three fields makes sure that every picture database/manager uses the same date,
+as the programs differ in which field they trust:
+
+- **PhotoPrism** prefers the `CreateDate` (= `DateTimeDigitized`) over the `DateTimeOriginal`
+  when both are present and differ. Therefore a fix writing only the `DateTimeOriginal` was ignored by
+  PhotoPrism and the pictures were shown under their digitization/creation date.
+- some other viewers prefer the `DateTimeOriginal` and fall back to the `ModifyDate` (= `DateTime`).
+
+Note: pictures fixed with an *older* version of this script (which set only the
+`Exif.Photo.DateTimeOriginal`) are not modified anymore as they are not considered missing.
+If you need the other two fields to be filled in such pictures as well, run the script once
+against a copy or set the fields manually, e.g.:
+`exiv2 -M"set Exif.Photo.DateTimeDigitized <date>" -M"set Exif.Image.DateTime <date>" <file>`
+
 # application
 The are several occasions where the picture creation date is either not stored in the jpeg file (for example during the conversion from the raw file) or was removed from it by intention (for example by posting to the social networks). As many picture databases/managers rely on the picture creation infomation such picture files become invisible for the viewer or at least not visible in the time view. So the provided script is to fix this issue as good as it can be made using automatic approach (see functionality). My idea is that this script is started on the regular basis on directory acting as the main picture storage an repairs the picture date for all new files missing it. Additional the user shall look into "tofix" file produced by script, to manually fix the issue for the files, which could not fixed automaticall. The most convenient fix in this case is to put the picture date into the file name, so the script will fill the internal creation date field of the field during the next run time.  
+
+Hint for PhotoPrism users: PhotoPrism reads the metadata only when it (re-)indexes the file
+(change detection is based on the file size and modification time). After fixing the dates with
+this script run `photoprism index` (or `photoprism index --rescan`) so that PhotoPrism picks up
+the new dates, or import the pictures only after they were fixed.
 
 # installation steps
 
@@ -70,4 +100,8 @@ Example: `LOGLEVEL=2 ./fixpictdate.sh /path/to/picture/dir`
 # test
 There is a test suite for the fuctionality. 
 The test script is test.sh and the test data are in the test folder.
+The suite checks besides the expected dates (test/expectations1.txt and test/expectations2.txt)
+that every fixed file has the same date in all three EXIF date fields
+and that a stale digitization date (CreateDate) is overridden by the folder date
+(regression test for the PhotoPrism behavior).
 
