@@ -26,6 +26,13 @@ pattern_date_time_seconds='^.*[^0-9](19[0-9][0-9]|20[0-2][0-9])[-_]*(0[1-9]|1[0-
 pattern_date_time='^.*[^0-9](19[0-9][0-9]|20[0-2][0-9])[-_]*(0[1-9]|1[0-2])[-_]*(0[1-9]|[12][0-9]|3[01])[-_]*([01][0-9]|2[0-4])[-_]*([0-5][0-9]|60).*$'
 # 2nd pattern to detect date if the 1st was not successful
 pattern_date='^.*[^0-9](19[0-9][0-9]|20[0-2][0-9])[-_]*(0[1-9]|1[0-2])[-_]*(0[1-9]|[12][0-9]|3[01]).*$'
+# the same patterns again for names with the day before the month, as used
+# for example by chat app exports (22-04-2026_20-42-24).
+# A name like "04-05-2026" cannot be told apart from "05-04-2026", so the
+# day is always assumed to come first here.
+pattern_date_time_seconds_dmy='^.*[^0-9](0[1-9]|[12][0-9]|3[01])[-_]*(0[1-9]|1[0-2])[-_]*(19[0-9][0-9]|20[0-2][0-9])[-_]*([01][0-9]|2[0-4])[-_]*([0-5][0-9]|60)[-_]*([0-9][0-9]).*$'
+pattern_date_time_dmy='^.*[^0-9](0[1-9]|[12][0-9]|3[01])[-_]*(0[1-9]|1[0-2])[-_]*(19[0-9][0-9]|20[0-2][0-9])[-_]*([01][0-9]|2[0-4])[-_]*([0-5][0-9]|60).*$'
+pattern_date_dmy='^.*[^0-9](0[1-9]|[12][0-9]|3[01])[-_]*(0[1-9]|1[0-2])[-_]*(19[0-9][0-9]|20[0-2][0-9]).*$'
 # 3rd pattern to detect month if the 2nd was not successful
 pattern_month='^.*[^0-9](19[0-9][0-9]|20[0-2][0-9])[-_]*(0[1-9]|1[0-2]).*$'
 
@@ -153,6 +160,15 @@ fix_pictdate() {
     elif [[ "_$filename" =~ $pattern_date ]]; then
         fix_date="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]}"
         log_DEBUG "detected the date from the file name: $fix_date"   
+    elif [[ "_$filename" =~ $pattern_date_time_seconds_dmy ]]; then
+        fix_date_time="${BASH_REMATCH[3]}:${BASH_REMATCH[2]}:${BASH_REMATCH[1]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}:${BASH_REMATCH[6]}"
+        log_DEBUG "detected the date/time (sec), day first, from file name: $fix_date_time"
+    elif [[ "_$filename" =~ $pattern_date_time_dmy ]]; then
+        fix_date_time="${BASH_REMATCH[3]}:${BASH_REMATCH[2]}:${BASH_REMATCH[1]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}"
+        log_DEBUG "detected the date/time, day first, from file name: $fix_date_time"
+    elif [[ "_$filename" =~ $pattern_date_dmy ]]; then
+        fix_date="${BASH_REMATCH[3]}:${BASH_REMATCH[2]}:${BASH_REMATCH[1]}"
+        log_DEBUG "detected the date, day first, from the file name: $fix_date"   
     elif [[ "_$dir" =~ $pattern_date ]]; then
         fix_date="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]}"
         log_DEBUG "detected the date from the dir name: $fix_date"   

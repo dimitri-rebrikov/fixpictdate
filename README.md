@@ -12,6 +12,10 @@ The script goes through all *.jpg and *.jpeg files in the directory and detect t
 For those files the script tries to find the mention of the picture date in:
 1. the name of the picture,
 2. the name of the directory.
+Both the year-month-day order (`2026-04-22_20-42-24`, `2026-04-22`) and the
+day-month-year order (`22-04-2026_20-42-24`, `22-04-2026`) are recognized in the
+picture name. As `04-05-2026` cannot be told apart from `05-04-2026`, names in
+day-month-year order are always interpreted day first.
 If it found it it puts the detected date as the picture creation date into the picture file.
 The non fixed files are listed in a "tofix" file in the root of the picture directory.
 

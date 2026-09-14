@@ -10,6 +10,9 @@ dir001_20200305/pict009_20200502.jpg;2020:05:02 14:26;detect that the date from 
 dir001_20200305/pict010_1975-02-16.jpg;1975:02:16 12:00; fix the empty picture date from the file name with default time #3
 dir001_20200305/pict011_1908-04-05.jpg;1908:04:05 12:00; fix the empty picture date from the file name with default time #3
 dir001_20200305/pict012_20201002_080405_137.jpg;2020:10:02 08:04; do not be mislead by additional numbers
+dir001_20200305/photo_1@22-04-2026_20-42-24.jpg;2026:04:22 20:42;fix the empty picture date from the file name in day-month-year order (with seconds)
+dir001_20200305/photo_2@22-04-2026.jpg;2026:04:22 12:00;fix the empty picture date from the file name in day-month-year order using the default time
+dir001_20200305/foto_04-05-2026_19-20.jpg;2026:05:04 19:20;day-month-year order is ambiguous so the day is assumed to come first
 dir002_2020-04/pict008 .jpg;2020:04:01 12:00;fix the empty picture date using the month from the folder name and default day and time
 dir003_2020-05-02/pict008 .jpg;2020:05:02 14:26;detect that the date from the folder name is the same as the change date and use the change date as the picture date
 dir004_2020-05/pict008 .jpg;2020:05:02 14:26;detect that the date from the folder name is the same as the change date and use the change date as the picture date
