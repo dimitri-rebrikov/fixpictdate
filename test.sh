@@ -191,15 +191,15 @@ fi
 
 # test for counting
 counting_test_cc=0
-if [ `grep "Finish: files found: 21, fixed: 15, not fixed: 4" "$test_run_dir/fixpictdate.sh.log" | wc -l` -ne 1 ]; then
+if [ `grep "Finish: files found: 24, fixed: 18, not fixed: 4" "$test_run_dir/fixpictdate.sh.log" | wc -l` -ne 1 ]; then
     echo "FAIL: counting files from the 1st test run"
     counting_test_cc=-1
 fi
-if [ `grep "Finish: files found: 29, fixed: 4, not fixed: 5" "$test_run_dir/fixpictdate.sh.log" | wc -l` -ne 1 ]; then
+if [ `grep "Finish: files found: 32, fixed: 4, not fixed: 5" "$test_run_dir/fixpictdate.sh.log" | wc -l` -ne 1 ]; then
     echo "FAIL: counting files from the 2nd test run"
     counting_test_cc=-1
 fi
-if [ `grep "Finish: files found: 28, fixed: 0, not fixed: 4" "$test_run_dir/fixpictdate.sh.log" | wc -l` -ne 1 ]; then
+if [ `grep "Finish: files found: 31, fixed: 0, not fixed: 4" "$test_run_dir/fixpictdate.sh.log" | wc -l` -ne 1 ]; then
     echo "FAIL: counting files from the 3rd test run"
     counting_test_cc=-1
 fi
@@ -248,6 +248,7 @@ fi
 if [ "$test1_cc" -eq 0 ] && [ "$test1_rr_cc" -eq 0 ] \
     && [ "$test2_cc" -eq 0 ] && [ "$cached2" -gt 0 ] \
     && [ "$test_remove_file_cc" -eq 0 ] \
+    && [ "$counting_test_cc" -eq 0 ] \
     && [ "$triple_cc" -eq 0 ] && [ "$regress_cc" -eq 0 ]; then 
     echo -e "\nTotal Test result: OK"
 else 

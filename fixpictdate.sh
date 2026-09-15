@@ -30,6 +30,10 @@ pattern_date='^.*[^0-9](19[0-9][0-9]|20[0-2][0-9])[-_]*(0[1-9]|1[0-2])[-_]*(0[1-
 # for example by chat app exports (22-04-2026_20-42-24).
 # A name like "04-05-2026" cannot be told apart from "05-04-2026", so the
 # day is always assumed to come first here.
+# The patterns are checked from the most precise to the least precise one and
+# within the same precision the year first before the day first pattern: the
+# year first patterns are loose enough to match a part of a day first name, e.g.
+# in "photo_55@11-06-2026_12-24-53.jpg" they read "2026_12-24" as 2026-12-24.
 pattern_date_time_seconds_dmy='^.*[^0-9](0[1-9]|[12][0-9]|3[01])[-_]*(0[1-9]|1[0-2])[-_]*(19[0-9][0-9]|20[0-2][0-9])[-_]*([01][0-9]|2[0-4])[-_]*([0-5][0-9]|60)[-_]*([0-9][0-9]).*$'
 pattern_date_time_dmy='^.*[^0-9](0[1-9]|[12][0-9]|3[01])[-_]*(0[1-9]|1[0-2])[-_]*(19[0-9][0-9]|20[0-2][0-9])[-_]*([01][0-9]|2[0-4])[-_]*([0-5][0-9]|60).*$'
 pattern_date_dmy='^.*[^0-9](0[1-9]|[12][0-9]|3[01])[-_]*(0[1-9]|1[0-2])[-_]*(19[0-9][0-9]|20[0-2][0-9]).*$'
@@ -154,15 +158,18 @@ fix_pictdate() {
     if [[ "_$filename" =~ $pattern_date_time_seconds ]]; then
         fix_date_time="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}:${BASH_REMATCH[6]}"
         log_DEBUG "detected the date/time (sec) from file name: $fix_date_time"
-    elif [[ "_$filename" =~ $pattern_date_time ]]; then
-        fix_date_time="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}"
-        log_DEBUG "detected the date/time from file name: $fix_date_time"
-    elif [[ "_$filename" =~ $pattern_date ]]; then
-        fix_date="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]}"
-        log_DEBUG "detected the date from the file name: $fix_date"   
     elif [[ "_$filename" =~ $pattern_date_time_seconds_dmy ]]; then
         fix_date_time="${BASH_REMATCH[3]}:${BASH_REMATCH[2]}:${BASH_REMATCH[1]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}:${BASH_REMATCH[6]}"
         log_DEBUG "detected the date/time (sec), day first, from file name: $fix_date_time"
+    elif [[ "_$filename" =~ $pattern_date_time ]]; then
+        fix_date_time="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}"
+        log_DEBUG "detected the date/time from file name: $fix_date_time"
+    elif [[ "_$filename" =~ $pattern_date_time_dmy ]]; then
+        fix_date_time="${BASH_REMATCH[3]}:${BASH_REMATCH[2]}:${BASH_REMATCH[1]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}"
+        log_DEBUG "detected the date/time, day first, from file name: $fix_date_time"
+    elif [[ "_$filename" =~ $pattern_date ]]; then
+        fix_date="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]}"
+        log_DEBUG "detected the date from the file name: $fix_date"   
     elif [[ "_$filename" =~ $pattern_date_time_dmy ]]; then
         fix_date_time="${BASH_REMATCH[3]}:${BASH_REMATCH[2]}:${BASH_REMATCH[1]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}"
         log_DEBUG "detected the date/time, day first, from file name: $fix_date_time"
