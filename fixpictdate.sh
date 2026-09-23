@@ -53,7 +53,7 @@ files_not_fixed=0
 #
 
 log () {
-   echo -e `date "+%Y:%m:%d %H:%M:%S"`: $@ >> "$log_file"
+   echo -e "$(date "+%Y:%m:%d %H:%M:%S"): $@" | tee -a "$log_file"
 }
 
 log_INFO () {
